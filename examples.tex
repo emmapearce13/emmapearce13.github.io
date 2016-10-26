@@ -1,0 +1,77 @@
+\chapter{Introduction}
+\label{intro}
+
+
+Here is an example of how to reference \citep[e.g.,][]{lange2016devito}.  And here is how we do it as part of a sentence as in \citet{lange2016devito}.
+
+
+Here is how to insert a figure:
+
+\begin{figure}[!htbp]
+\begin{center}
+\includegraphics*[angle=0, width=0.95\linewidth]{CHAPTERS/PICS/EAR.pdf}
+\end{center}
+\caption[Here is a caption that goes in the list of figures]
+{This part of the caption goes below the figure itself.}
+\label{EAR}
+\end{figure}
+
+And now that it has a label, you can reference it as Figure \ref{EAR}.
+
+
+If you want to crop a pdf image to fit into a LaTeX document, you could use  pdfcrop to do it.
+
+\verb|pdfcrop file.pdf|
+
+and note that if you want to create a pdf file from ps files that emerge from GMT, you can do it like this:
+
+\verb|ps2pdf file.ps|
+
+\verb|pdfcrop file.pdf|
+
+Adding a couple of lines like this in your GMT scripts would create a LaTeX ready file.
+
+And here is how to make a table:
+
+\begin{table}
+\caption[Here is a caption that goes in the list of Tables]
+{This part of the caption goes below the Table itself.}
+\begin{center}
+\begin{tabular}{lllrll}
+\hline
+Station & Lat. & Lon. & Elev. (m) & Network & Location \\
+\hline
+CRLN & 64.189 & -83.348 & 66  & HuBLE-UK & Southampton Island 	\\
+CTSN & 62.852 & -82.485 & 41  & HuBLE-UK & Coats Island 		\\
+\hline
+\end{tabular}
+\end{center}
+\label{some_data}
+\end{table}
+\newpage
+
+
+Here are some equations using maths mode (you may remember these from seismology in second year):
+
+\begin{equation}
+t_{1}= H\left[{\sqrt{\frac{1}{V_{S}^{2}}-p^{2}} - \sqrt{\frac{1}{V_{P}^{2}}-p^{2}}} \,\right]
+\label{RFStravelT1}
+\end{equation}
+
+\begin{equation}
+t_{2}=H\left[{\sqrt{\frac{1}{V_{S}^{2}}-p^{2}} + \sqrt{\frac{1}{V_{P}^{2}}-p^{2}}}\,\right]
+\label{RFStravelT2}
+\end{equation}
+
+\begin{equation}
+t_{3}=2H\sqrt{\frac{1}{V_{S}^{2}}-p^{2}}
+\label{RFStravelT3}
+\end{equation}
+
+where $p$ is the ray parameter (skm$^{-1}$).  Note that maths mode can also be done within the text, which can be quite useful when referring to splitting parameters such as $\phi$ and $\delta$t.
+
+
+
+
+
+

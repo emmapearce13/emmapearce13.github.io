@@ -1,0 +1,44 @@
+\chapter{litreview}
+\label{litreview}
+
+Introduction: 
+
+Full Waveform Inversion (FWI) is a numerical method that provides high resolution quantitative images obtained via seismic exploration. It is a mix of the most successful parts of seismic reflection and seismic refraction, providing data that can specify information of the geometrical distribution of geological features along with quantitative images of the Earth's physical properties. 
+It uses the two-way wave equation to predict seismic data from a model and aims to find a model that matches the raw data wiggle-for-wiggle by reducing the difference between the predictions and the observed field data (pre-stacked) \ref{arantola2005inverse}. 
+\\ 
+Historically, seismic techniques have been used as a method of imaging the interior of the Earth's surface, with the first attempt recorded as early as the end of the 19th century \ref{guasch20123d}. From here full-waveform inversion has evolved due to the contribution of multiple scientists and is now the preferred seismic method amongst geophysicists due to its high degree of spatial resolution and cost effectiveness when imaging large 3D volumes. FWI is therefore being expanded to dimensions that better represent real life examples. In 2011 \ref{guasch20123d} completed his PhD thesis expanding FWI to three dimensions along with Elastic properties, programming extensive numerical solutions to the seismic wave equation in Fortran.Although successful, this is a heavily computationally expensive scheme and requires extensive knowledge on how to programme. My MSci project will utilise this thesis and implement the working FWI in Python using SymPy, providing an accessible platform to run simulations on real life data.   
+
+
+\section{FWI} 
+FWI is based on the principle that seismic wave energy propagation through the Earth’s surface obeys the Seismic Wave Equation (SWE). This equation has analytical solutions for relatively simple models, where the model is able to describe the medium in which the wave is travelling. The restricting properties however are that the model can only take parameters that can be represented by a mathematical analytical function whose properties are dependent on the SWE's parameters. Although this can be useful for simulations, real world parameters cannot be described in this way, therefore it is not possible to solve the wave equation analytically in any realistic representation of the Earth. This leads to the SWE needing to be solved using numerical solutions \ref{pratt1998gauss}. 
+
+In its most simple form the acoustic wave equation used by FWI can be represented by 
+
+\begin{equation}
+\frac{1}{c^{2}}\frac{\partial  ^{2}\rho }{\partial t^{2}} -\bigtriangledown.\left ( \frac{1}{\rho^{2}} \bigtriangledown p\right ) = s
+\label{simple_wave_equation}
+\end{equation}
+
+where $p$ is acoustic pressure and $s$ is the driving source that both vary in time and space, and $c$ is the accoustic pressure and $\rho$ vary only in space. 
+
+The examples of FWI in this report apply to 2D small-amplitude pressure waves propagating within an inhomogeneous, isotropic, non-attenuating, non-dispursive, stationary, fluid medium. Although relatively easy to add 3D, anisotropy, attenuation and elastic effects as the general approach stays the same, the numerical complexity increases which in turn leads to larger computational power and memory being required, which with the allocated time scale of this project was not possible. 
+
+\section{Objective Function}
+The process of FWI requires finding an optimal paramater model by reducing an objective functional that measures the difference between the observed data and the synthetic model \ref{han2014seismic}.  
+The most popular approach to solve the wave equation analytically has been the finite-difference (FD) iterative method first implicated by \ref{alterman1968propagation}. This seeks to minimise the difference between the observed seismic dataset ($d_{obs}$) and that predicted by FWI ($d_{calc}$) by reducing an objective functional ($f$) that measures the difference between the observed data and the synthetic model \ref{han2014seismic}. 
+\\ $f$ is a real positive scalar quantity, and is a function of the model $\mathbf{m}$ and is defined as 
+
+\begin{equation}
+f(\mathbf{m})= \frac{1}{2}\left | d_{calc}-d_{obs} \right|^{2}
+\label{objective_function}
+\end{equation}
+
+One of the most appealing features of using the FD approach is that when solving the SWE the various difference operators are all centred at the same point in space and time meaning that the velocities are updated independently from the stresses. This allows for a very concise and efficient implementation \ref{graves1996simulating}. 
+
+
+
+
+\section{Alternative Methods} 
+  Van de berg and kleinman 
+
+thesis and mike;s notes 
