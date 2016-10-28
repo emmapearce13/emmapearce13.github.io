@@ -1,0 +1,58 @@
+\chapter{Inverse Theory}
+\label{ftheory}
+
+\section{Accoustic Wave Equation } 
+FWI is based on the principle that seismic wave energy propagation through the Earth’s surface obeys the Accoustic Wave Equation (AWE). This equation has analytical solutions for relatively simple models, where the model is able to describe the medium in which the wave is travelling. \\
+In its most simple form the acoustic wave equation used by FWI can be represented by 
+
+\begin{equation}
+\frac{1}{c^{2}}\frac{\partial  ^{2}\rho }{\partial t^{2}} -\bigtriangledown.\left ( \frac{1}{\rho^{2}} \bigtriangledown p\right ) = s
+\label{accoustic_wave_equation}
+\end{equation}
+
+where $p$ is acoustic pressure and $s$ is the driving source that both vary in time and space, and $c$ the acoustic pressure and $\rho$ the density vary only in space. \\
+The restricting properties however are that the model can only take parameters that can be represented by a mathematical analytical function whose properties are dependent on the AWE's parameters. Although this can be useful for simulations, real world parameters cannot be described in this way, therefore it is not possible to solve the wave equation analytically in any realistic representation of the Earth. This leads to the SWE needing to be solved using a combination of numerical solutions that form the Seismic Inversion mehod \citep{pratt1998gauss}. 
+
+\section{Inverse Theory } 
+The concept of Inverse theory was introduced by Viktor Ambartsumian in the latter part of the 1920s. Although at the time the paper he published presenting the idea that  "a homogeneous string is uniquely determined by its set of oscillation frequencies \citep{ambartsumian1998life}", was largely ignored, 15 years later it begun to attract the attention of scientists. This resulted in inversion being one of the most important fields in physics. \\
+Simply put, the Inverse problem is when a governing law is provided and an attempt is made to predict the result of a particular experiment. \\
+
+\subsection{Forward Problem}
+
+With a forward problem a starting model is used to get the data. This model is a straightforward application of the governing laws of physics applied to a set of pre defined variables which define the system being studied. If inversion was run on this a unique solution would be obtained through the use of the laws of physics as all the required parameters are pre defined. 
+This is usually represented by the equation, 
+
+\begin{equation} 
+\textbf{d} = G(\textbf{m})
+\label{forward_equ}
+\end{equation}
+
+Although the wave equation represents a linear relationship between a wavefield $p$ and the source $s$, it also represents the above non-linear relationship shown in equation \ref{forward_equ} where $G$ is an operator representing physical laws (e.g the wave equation), that relates $\textbf{d}$ the data (wave field) to the model parameters $\textbf{m}$. 
+
+\subsection{Inverse Problem}
+Unlike the forward problem, the inverse problem  will not usually have a unique solution. Furthermore even for the same input it can provide different results (non-deterministic). The number of dimensions of the model is defined by the number of different measurable variables in comparison to the forward model that has uniquely defined dimensions of the model space for a particular problem. \\
+The related inverse problem corresponding to equation \ref{forward_equ} is 
+
+\begin{equation}
+\hat{\textbf{m}} = G^{-1}\textbf{d} 
+\label{Inverse_equ}
+\end{equation}
+which allows the model parameters to be different from the ones in the forward model. 
+
+\section{Objective Function}
+The difficulty of inversion arises as in most problems, including waveform inversion, $G$ is not invertible. Further more it is non linear which prevents a system of linear equations being able to solve the forward problem using numerical methods. To overcome this an objective function ($f$) is defined that uses optimisation methods to minimise the value of $f$, where $f$ is a real positive scalar quantity, and is a function of the model $\mathbf{m}$ and is defined as
+
+\begin{equation}
+f = \left \| d_{calc}-d_{obs} \right \|_{p} = \left \| G(\textbf{m})-d_{obs} \right \|_{p}
+\label{objective_function}
+\end{equation}
+
+where $d_{obs}$ is the observed data, $d_{calc}$ the calculated data obtained using a known initial model and $\left \|  \right \|_{p}$ is the $L^{2}$ norm (Appendix \ref{notation_definitions}).
+ 
+Once the global minimum of $f$ is identified this is the solution to the problem \citep{han2014seismic}.  
+
+The solution space that will be defined by $f$ will often have more than one minima. Assuming the local minima are wrong, it will aim to find the global minima of the inverse problem. This minima can be found using the local method of steepest-decent (Appendix \ref{notation_definitions})
+
+This method was chosen as the computational cost of solving the wave equation is expensive, and in it's discretised form the number of variables can reach into the range of tens of millions. Therefore using alternative global methods such as genetic algorithms \ref{sambridge1992genetic} would take a  long time to run (months).  
+
+
