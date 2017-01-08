@@ -1,0 +1,54 @@
+\chapter{Results}
+\label{results}
+
+Inversions produced of both the phantom and Marmousi using the FWI notebook. The values of $f$ and $\alpha$ for each inversion are shown in Appendix \ref{results_ap}. The graphs show the convergence of the objective function towards the minimum value across all iterations. All models are in velocity with dark red the maximum velocity, and dark blue the minimum. 
+\begin{landscape}
+
+\begin{figure}[!ht]
+  \centering
+   \includegraphics[angle=0, width=0.9\linewidth]{CHAPTERS/PICS/image_f3_g15.png}
+  \vspace*{\floatsep}
+  \includegraphics[angle=0, width=0.5\linewidth]{CHAPTERS/PICS/graph_f3_30it.png}
+  \caption[Reconstruction of Phantom 2D after 30 iterations with frequency at 3Hz]
+{Reconstruction of Phantom 2D after 30 iterations using 5 random shots per iteration. Frequency is set at 3Hz. A mask has not been included in the inversion algorithm. Convergence of the functional towards the minimum is achieved within the first 10 iterations.Minimum functional value is 363.28 $\times 10^{4}$}
+ \label{f3_30it}
+\end{figure}
+
+\begin{figure}
+  \centering
+   \includegraphics[angle=0, width=0.9\linewidth]{CHAPTERS/PICS/f3_30it_small_anom_mask.png}
+  \vspace*{\floatsep}
+  \includegraphics[angle=0, width=0.5\linewidth]{CHAPTERS/PICS/graph_mask_f3.png}
+  \caption[]{A mask has been included and the previous inversion re-run. Minimum functional value of 196.97 $\times 10^{4}$ is achieved}
+ \label{mask}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+ \includegraphics[angle=0, width=0.9\linewidth]{CHAPTERS/PICS/300it_5shot.png}
+  \vspace*{\floatsep}
+  \includegraphics[angle=0, width=0.5\linewidth]{CHAPTERS/PICS/graph_f15_30it.png}
+\caption[Phantom 2D model with 5 shots used per iteration for 30 iterations with frequency at 15Hz ]{Phantom 2D model with 5 shots used per iteration for 30 iterations with frequency at 15Hz. A lack of reconstruction of the true model is seen, with the functional minimum value of 2.97 $\times 10^{4}$.}
+ \label{f15_30it}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+ \includegraphics[angle=0, width=0.9\linewidth]{CHAPTERS/PICS/lowres_f3_30it.png}
+  \vspace*{\floatsep}
+  \includegraphics[angle=0, width=0.5\linewidth]{CHAPTERS/PICS/graph_marmousi_f3.png}
+\caption[Marmousi model inverted using a frequency of 3Hz for 30 iterations]{Marmousi model inverted using a frequency of 3Hz for 30 iterations with a final residual 46.13 and a minimum functional value of 0.12.}
+ \label{mar_f3}
+\end{figure}
+\begin{figure}
+
+\vspace*{\floatsep}
+ \centering
+ \includegraphics[angle=0, width=0.9\linewidth]{CHAPTERS/PICS/lowres_f5_30it.png}
+  \vspace*{\floatsep}
+  \includegraphics[angle=0, width=0.5\linewidth]{CHAPTERS/PICS/graph_marmousi_f5.png}
+\caption[Marmousi velocity model inverted using a frequency of 5Hz for 30 iterations]{Marmousi model inverted using a frequency of 5Hz for 30 iterations with final residual of 45.95 and a minimum functional value of 0.10.}
+ \label{mar_f5}
+\end{figure}
+
+\end{landscape}

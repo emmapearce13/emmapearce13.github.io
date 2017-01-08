@@ -1,13 +1,125 @@
+
 \chapter{Introduction}
 \label{intro}
 
+Full Waveform Inversion (FWI) is a numerical method whose goal is to create high-resolution quantitative images from seismic data. It is a mix of the most successful parts of seismic reflection and seismic refraction, providing data that can specify information of the geometrical distribution of geological features along with quantitative images of the Earth's physical properties such as velocity and density \citep{tarantola2005inverse}. \par
 
-Full Waveform Inversion (FWI) is a numerical method that provides high resolution quantitative images obtained via seismic exploration. It is a mix of the most successful parts of seismic reflection and seismic refraction, providing data that can specify information of the geometrical distribution of geological features along with quantitative images of the Earth's physical properties. 
-It uses the two-way wave equation to predict seismic data from a model and aims to find a model that matches the raw data wiggle-for-wiggle by reducing the difference between the predictions and the observed field data (pre-stacked) \citep{tarantola2005inverse}. \\
- 
-Historically, seismic techniques have been used as a method of imaging the interior of the Earth's surface, with the first attempt recorded as early as the end of the $19^{th}$ century. From here full-waveform inversion has evolved due to the contribution of multiple scientists and is now the preferred seismic method amongst geophysicists due to its high degree of spatial resolution and cost effectiveness when imaging large 3D volumes. FWI is therefore being expanded to dimensions that better represent real life examples. In 2011 \citet{guasch20123d} completed his PhD thesis expanding FWI to three dimensions with Elastic properties being taken into account, programming extensive numerical solutions to the seismic wave equation in Fortran. Although successful, to implicate FWI in Fortran requires a detailed knowledge of the program along with many lines of code. Due to this FWI has been re-coded utilising the work of \citep{guasch20123d} but implemented in Python by Opesci  \citep{bworld}.  This enables equations to be written using Sybolic Python requiring only a few lines of code to achieve the same result. \\
+The wave equation, an equation that accurately describes wave propagation in a complex medium \citep{mulder2004comparison}, is used to predict seismic data from a best-guess starting model and aims to find a solution that matches the raw seismic data trace-by-trace. Achieved by improving the subsurface model through iteratively solving a minimisation problem, where it is the difference between the observed data and the simulation that is being minimised \citep{warner2013anisotropic}. \par
 
-This project will implement and test the work by Opesci for FWI and compare the results to those obtained by \citep{guasch20123d} for the same data to establish variations between the two methods. The examples of FWI in this report apply to 2D small-amplitude pressure waves propagating within an inhomogeneous, isotropic, non-attenuating, non-dispersive, stationary, fluid medium. Although relatively easy to add 3D, anisotropy, attenuation and elastic effects as the general approach stays the same, the numerical complexity increases which in turn leads to larger computational power and memory being required, which with the allocated time scale of this project was not possible. 
- 
+Historically, seismic techniques have been used as a method of imaging the Earth's interior, with the concept first being introduced by Viktor Ambartsumian in the latter part of the 1920s \citep{guasch20123d}. Although at the time the paper was published presenting the idea that ``a homogeneous string is uniquely determined by its set of oscillation frequencies " \citep{ambartsumian1998life} was largely ignored, 15 years later it begun to attract the attention of scientists. Since these early attempts, FWI has evolved and is now the preferred seismic method amongst geophysicists due to its high degree of spatial resolution and cost effectiveness \citep{pratt1999seismic}. FWI is now being expanded to dimensions that better represent real life examples and in principle, it can be used to recover any physical property that is a parameter of the seismic wavefield \citep{warner2013anisotropic}. \citet{guasch20123d} expanded the inversion to three dimensions with elastic properties being taken into account. Although successful, the implementation was difficult to extend further because of the complex algorithms used in FWI and the need for high computational performance. Further to this, developing a new method is a difficult and laborious task, particularly when programming in a low level language such as Fortran. \par
+In this work, FWI has been implemented in Python, a high level language, using the domain specific language compiler Devito \citep{lange2016devito} \citep{warner2013anisotropic}, whilst utilising the numerical acoustic framework develop by \citet{guasch20123d}. This significantly reduces the complexity of the FWI implementation whilst still parallelising and optimising the software, achieving the same or better performance as carefully hand tuned codes. \par
+Through the use of a simple to use Jupyter Notebook \footnote{jupyter.org} that makes the running of FWI on different models practical to execute whilst enabling parameters to be easily changed, a new methodology for FWI has been established. This is the first time that both FWI and reverse time migration (RTM) have been accomplished in this way, providing the possibility for partial differential equation discretisations to be written in only a few lines of code by those less proficient at programming. The implementation of a new methodology is a laborious task that encounters many unexpected errors, therefore the examples of FWI in this work apply to synthetic 2D small-amplitude pressure waves propagating within an inhomogeneous, isotropic, non-attenuating, non-dispersive, stationary, fluid medium. Although possible to expand this model to include 3D, anisotropy, attenuation and elastic effects, due to the difficulty of creating a new methodology these have been ignored to simplify the process. \par
 
- 
+Codes utilising Devito in this dissertation can be found via the OPESCI github website\footnote{github.com/opesci}. 
+
+\section{Background}
+
+\subsection{Devito}
+Devito utilises a finite difference Domain Specific Language (DSL) to allow solvers to be implemented at a high-level using symbolic python (SymPy\footnote{www.sympy.org}). Python and NumPy provide the glue for implementing FWI while complied C code is generated for the actual solvers. Devito has been used to write programs to execute FWI and RTM. They both allow the integration of external synthetic velocity models and the subsequent migration/inversion calculated \citep{lange2016devito} to produce reconstructions of the Earth's subsurface. 
+
+\subsection{Reverse time migration}
+RTM is the practice of re-locating diffraction events on unmigrated seismic records to points, thereby moving (``migrating") reflection events to their proper locations in time, creating a true image of structures within the earth. Traditional migration techniques only propagate data downwards through a velocity model, in comparison to RTM, which propagates data both downwards and upwards producing high resolution models of the subsurface \citep{gray2001seismic}. RTM is currently recognised as the most common method of seismic modelling as it offers an acceptable compromise between computational power and image quality, unlike current methods of FWI \citep{yoon2004challenges}. \\
+To aid in the development of FWI in Devito, the synthetic model will first be tested using RTM as this is less computationally expensive, therefore highlighting implementation errors particularly those associated with the gradient calculation, which is used by both RTM and FWI, thus enabling changes to be made more rapidly as it is written in a high level language. Once the initial model has been converted to the Devito format and successfully integrated into the RTM code, it can then be modified to create a basic FWI implementation. 
+
+\subsection{Full waveform inversion} 
+FWI is based on the principle that seismic wave energy propagation through the Earth’s surface can be approximated by the a wave equation that has oscillatory solutions, such as that shown in equation \ref{accoustic_wave_equation}. This equation has analytical solutions for relatively simple models, where the model is able to describe the medium in which the wave is travelling in through the medium's physical properties. The condition being that to be able to model the seismic waves the model's physical parameters must be able to be represented by a mathematical analytical function with some properties that are dependent on the wave equation media parameters. \\
+In its most simple form the wave equation used by FWI can be represented by 
+
+\begin{equation}
+\frac{1}{c^{2}}\frac{\partial ^{2}\rho }{\partial t^{2}} -\bigtriangledown.\left ( \frac{1}{\rho^{2}} \bigtriangledown p\right ) = s. 
+\label{accoustic_wave_equation}
+\end{equation}
+
+Where $p(x,t)$ is acoustic pressure, $s(x,t)$ is a source term, and $c(x)$ the speed of sound in the medium and $\rho(x)$ the density. \\
+
+The problem is that the geometrical distribution of media parameters in the real world cannot be described by an analytical function, removing the possibility of solving the wave equation analytically, resulting in the need for using a numerical method to model seismic waves \citep{guasch20123d}. 
+
+\section{Inverse theory} 
+
+\subsection{Forward inverse problem}
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[angle=0, width=0.95\linewidth]{CHAPTERS/PICS/forwardmodel.png}
+\caption[Visual representation of the difference between a forward and inverse problem]{Visual representation of the relationship between physical quantities (model parameters) and real observations (data) and how they relate to the process of having a forward and an inverse problem. The model parameters are seismic velocity, and the data is a pressure seismogram.}
+\label{forward_problem}
+\end{center}
+\end{figure}
+
+A forward problem as shown by figure \ref{forward_problem} is defined where a starting model made of physical quantities is used to generate the predicted wave-field (observed data). This observed data model is a straightforward application of the governing laws of physics applied to a set of pre-defined variables that describe the system being studied\citep{guasch20123d}. If inversion were performed on this, a unique solution to the wave equation is obtained through the use of the laws of physics, as all the required parameters are pre defined. 
+This is usually represented by the discrete wave equation, 
+
+\begin{equation} 
+\textbf{p} = G(\textbf{m}).
+\label{forward_equ}
+\end{equation}
+
+Although the wave equation represents a linear relationship (equation \ref{accoustic_wave_equation}), it also represents the non-linear relationship shown in equation \ref{forward_equ} where $G$ is an operator representing physical laws (e.g the wave equation), that relates $\textbf{p}$ the data (the predicted seismic wave-field) to the model parameters $\textbf{m}$ that describes the subsurface \citep{warner2013anisotropic}. Unlike the forward problem, the inverse problem will not usually have a unique solution (non-deterministic). \par
+The related non-linear inverse problem corresponding to equation \ref{forward_equ} is 
+
+\begin{equation}
+\hat{\textbf{m}} = G^{-1}\textbf{d}. 
+\label{inverse_equ}
+\end{equation}
+
+Where $\textbf{d}$ now represents the observed field data and $\hat{\textbf{m}}$ is the model for which we are trying to solve. 
+
+\subsection{Objective function}
+The difficulty of inversion arises as $G$ is not a matrix, it is a non-linear function that describes how to calculate the wavefield $\textbf{p}$ given the model $\textbf{m}$ and is dependent on the source. Therefore it is not possible to invert $G$ and being non-linear prevents a system of linear equations being able to solve the forward problem using numerical methods. To overcome this, an approximate solution to equation \ref{inverse_equ} is obtained which is improved using iteration. A starting model $\mathbf{m_{0}}$ is chosen that is reasonably close to the true model. A residual data set $\Delta \textbf{d}$ is then defined as the difference between the predicted and observed data $\Delta \textbf{d} = \textbf{p} \prime - \textbf{d}$ where $\Delta \textbf{d}$ is a function of the starting model, $\textbf{p} \prime$ is the data set that equation \ref{forward_equ} predicts and $\textbf{d}$ is the observed data set. This will then be used to create a new model that minimises the difference between the observed and simulated data. A scalar quantity known as the  objective function ($f$) is then defined by, 
+
+\begin{equation}
+f = \frac{1}{2} \left \| \textbf{p} \prime- \textbf{d} \right \|_{2}^{2} = \left \| G(\textbf{m})- \textbf{d} \right \|_{2}^{2}, 
+\label{objective_function}
+\end{equation}
+
+that is equal to the squares of $ \Delta \textbf{d}$. A value of zero for $f$ would indicate that the observed data and the predicted data are identical, thus the inversion has been successful. Because this is an undeterministic problem, the goal of the inversion is to find a model that minimises $f$ where $\left \| \right \|_{2}^{2}$ is the $L^{2}$ norm squared. If we consider the set of $f$ values for every possible subsurface model a `surface' can be created, where the global minimum of this hyper-surface is identified as the solution to the problem \citep{han2014seismic}. This solution space defined by $f$ will often have more than one minima, therefore it is important to have a reasonable initial guess to minimise the risk of falling into a poor local minima when methods such as the steepest descent are used, explaining why $\mathbf{m_{0}}$ must be reasonable close to the true model. 
+
+\subsection{Gradient}
+If a linear relationship between changes in the model and the corresponding residual is assumed, then the change that should be made to the starting model to reduce $f$ are represented by,
+
+\begin{equation}
+\Delta \textbf{d} = - \mathbf{H^{-1}}\frac{\partial f}{\partial \mathbf{m}}. 
+\label{hessian}
+\end{equation}
+
+Where $\mathbf{H}$ is the Hessian matrix containing all second-order differentials of $f$ and 
+$\frac{\partial f}{\partial \mathbf{m}}$ is the gradient of $f$ (both with respect to all model parameters). As $\frac{\partial f}{\partial \mathbf{m}}$ cannot be calculated directly the adjoint method is used, provided by \citet{tarantola1984inversion} (Appendix \ref{notation_definitions}). $\mathbf{H}$ however is much harder to calculate due to its size, therefore only the diagonal elements of it are computed. The approximation of the diagonal elements of $\textbf{H}$ are possible to calculate using spatial preconditioning (Appendix \ref{notation_definitions}) where ${h_{ii}}$ corresponds to model parameter $m_{i}$. A final equation representing the model update is then represented by, 
+
+\begin{equation}
+\Delta m_{i} = - \frac{\alpha}{h_{ii}} \frac{\partial f}{\partial m_{i}}, 
+\label{steplength}
+\end{equation}
+
+where $\alpha$ is the step-length, a scaling factor. When using FWI with a real dataset a starting model is needed along with a source wavelet. The adjoint source is back propagated from the receivers by treating them as sources and producing a residual wavefield. This is then cross-correlated with the source wavefield (used to generate the simulated receiver data) in the time domain for each point in the model, producing a gradient for each source. These gradients are then stacked (i.e. summed) together to produce the global gradient $\frac{\partial f}{\partial m_{i}}$ from equation \ref{steplength} which tells us the direction of steepest decent that is assumed to be the direction the model should be adjusted in \citep{pratt1998gauss}.
+
+\subsection{Step length}
+\label{step_length_section}
+The step-length $\alpha$ is a scaling factor used to adjust the starting model by a small amount and then observing the effect this adjustment has on the residual \citep{pratt1998gauss}. From this the optimum factor of $\alpha$ by which to adjust the model in order to minimise $\Delta \mathbf{d}$ is obtained using, 
+
+\begin{equation}
+\mathbf{\alpha} = \frac{(\Delta d^{0})^{\dagger}(\Delta d^{0} - \Delta d^{1})}{(\Delta d - \Delta d^{1})^{\dagger}(\Delta d^{0} - \Delta d^{1})}, 
+\label{step_length}
+\end{equation}
+
+where $\Delta d^{0}$ and $\Delta d^{1}$ are the residual from the starting guess model and the first perturbation model respectively. Showing that $\alpha$ only depends on the already calculated residuals at the two different points and therefore its optimum value can be directly computed using only one extra forward model to determine $\Delta d^{1}$ \citep{guasch20123d}. Shown visually in figure \ref{solutionspace}. Therefore, adjusting the model by this calculated value of $\alpha$ will scale it closer to the minimum. The complete work flow followed by FWI is shown in figure \ref{fwiworkflow} providing a summary of the iterative process.  
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[angle=0, width=0.90\linewidth]{CHAPTERS/PICS/solutionspace.png}
+\caption[Solution space showing visually the gradient and the step length]{The solution space where the minimum is assumed to be the global minimum. The red cross is representative of $\Delta d^{0}$ and the blue cross the minimum of $f$ along the direction of the gradient in image (a). 
+$\Delta d^{1}$ would be a point between the two crosses that is able to assume the residual has a linear relationship. Image (b) shows the residual values along the gradient direction where the minimum value of $f$ is reached when the model has been scaled by a step length value equal to $\alpha_{0}$. Image taken from \citet{guasch20123d}.}
+\label{solutionspace}
+\end{center}
+\end{figure}
+
+\subsection{Summary}
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[angle=0, width=0.90\linewidth]{CHAPTERS/PICS/workflow2.png}
+\caption[FWI Workflow]{The work flow followed by FWI when undergoing iterations to reduce the objective function $f$. }
+\label{fwiworkflow}
+\end{center}
+\end{figure}
+
+Exploration seismology is by far the most important geophysical technique used in industry due to its higher accuracy, resolution, and penetration than other methods \citep{sheriff1995exploration}. Currently within industries such as the oil and gas methods such as RTM are used to map the geological structures rather than identifying the hydrocarbons directly in the material properties. FWI is desirable as it is able to take this method further and recover subsurface properties including density, from only one parameter; in this case, velocity. Thus allowing the detailed reconstruction of the subsurface without the need to drill wells or boreholes, which is currently what is needed if you want to be able to relate the lithology to the structure. This provides the motivation behind the current project to allow FWI to become common practice within industry with a practical FWI methodology that uses less computational resources and can be executed using a high level language. 

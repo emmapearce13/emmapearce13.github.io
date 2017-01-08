@@ -1,0 +1,12 @@
+\chapter{Conclusion}
+
+The new methodology of FWI enables the simple implementation of a model into a user friendly interface. The model can be stored in a separate data file and loaded into the FWI algorithm. The number of iterations run and shots utilised can be easiliy changed allowing the user to dictate the level of resolution and time given to getting an inversion. Other parameters related to the model are also easily changed. The variation of the grid spacing, frequency and the time step can be adjusted and the impact quickly observed, allowing the optimum values for each to be found. 
+
+Further to this, the methodology can easly be upgraded to run much larger and higher resolution models by simply increasing the number of engines available with the parallel computing, providing the opportunity for the program to be integrated into industries, specifically the oil and gas, where FWI would play a valued role in improving the interpretations and understanding of the subsurface. 
+
+Improvements are required to the new methodology to provide a robust algorithm, including  the integration of a second order gradient method, a preventer of cycle skipping and a Hessian Pre conditioner to provide a more reliable reconstruction that better represents the true subsurface and does not run the risk of converging towards a local rather than global minimum of the objective function. 
+
+To improve the reconstruction speed and resolution a second order gradient function should be incorporated. Although with the current synthetic models that have been tested this will have limited impact, with a real life dataset where the initial guess model is larger and further from the true data a second order gradient method will help the inversion to converge towards the true solution. 
+
+The new methodology has been successful at running inversions and is a quicker and easier to manipulate interface in comparison to that used by \citet{guasch20123d}. It is a step in the right direction to FWI being implemented as common practice within industries. 
+

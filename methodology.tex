@@ -1,0 +1,128 @@
+\chapter{Methodology}
+\label{methodology}
+
+\section{Jupyter notebook}
+All of the algorithms shown are run through Jupyter Notebook, a web application that allows code to be run and edited `live' in a notebook style interface, intended to be a user friendly application. 
+
+\section{Devito}
+Equations used have been written using Devito, a domain specific language (DSL) designed to make the software implementation look similar to the equations being solved. As an example, the forward wave equation with absorbing boundary conditions can be written as: 
+
+\begin{equation}
+\eta \frac{du(x,t)}{dt} + m \frac{d^{2}u(x,t)}{dt^{2}} - \Delta^{2} u(x,t) = q
+\end{equation}
+where $u$ denotes the pressure wave field, $m$ is the square slowness, q is the source term and $\eta$  denotes the spatially varying dampening factor used to put an absorbing boundary condition in place. 
+which can then be represented in Devito by:
+
+\begin{verbatim}
+		wave_equation_forward = m*u.dt2 - u.laplace + damp * u.dt
+		stencil_forward = solve(wave_equation,u,forward)[0]
+\end{verbatim}
+
+where Devito's $dt$, $dt^{2}$ and laplace operators are used to perform the stencil expansion
+according to the spatial and temporal discretization order and the damping factor is dealt with via a separate expression. The resulting expression is then rearranged using the SymPy solve routine to show forward propagation, from which the corresponding operator can be created and executed \citep{lange2016devito}. 
+Appendix \ref{notation_definitions} shows how to install Devito manually. 
+
+\section{Parallel computing}
+To run both RTM and FWI they have been parallelised using ipyparallel \footnote{ipyparallel.readthedocs.io}. Computers have random-access memory (RAM) that cannot cope with the demands of real sized FWI problems, mainly due to the elevated number of sources present in the data. The use of parallel computing can mitigate this problem. It allows multiple calculations to be executed at the same time by accessing a large cluster of networked multicore computer nodes usually designated to run different shots across different nodes shown by figure \ref{parallel}, thus reducing the time needed to calculate RTM/FWI. The maximum size of the model is defined by the memory of the nodes \citep{podvin1991finite}. 
+
+\begin{figure}[!ht]
+\begin{center}
+ \includegraphics[angle=0, width=0.75\linewidth]{CHAPTERS/PICS/parallel.pdf}
+\caption[Parallel computing]{Parallel computing showing one of the nodes in the cluster with n amount of shots running from it. MPI - Message Passing Interface, an API, is used to communicate the different processes across the cluster.}
+\label{parallel}
+\end{center}
+\end{figure}
+
+Parallel computing is the reason that FWI is feasible on a reasonable time scale. This method is used on a larger scale in industry meaning if the code is required to process higher resolution/larger images, it would just be a matter of increasing the number of clusters available to run the algorithms. Instructions on how to set up the parallel environment are shown in Appendix (\ref{notation_definitions}). 
+
+\section{Initialising 2D synthetic models}
+Created using the script \verb|Synthetic Model| in Appendix \ref{scripts} producing a phantom 2D model \ref{testplot}, representative of a true subsurface model from observed data. This has then been adjusted to create figure \ref{baseplot} that is used as the starting guess for the inversion. 
+
+\begin{table}[!h]
+\centering
+\caption{Parameters for both the phantom and Marmousi model}
+\label{parameters}
+\begin{tabular}{l|l|l}
+\textbf{Parameter}             & \textbf{Phantom} & \textbf{Marmousi} \\ \hline
+Frequency $F$                  & 10Hz             & 15Hz              \\
+Grid spacing                   & 15m              & 7.5m              \\
+Spatial order                  & 4                & 4                 \\
+number of sources to receivers & 666              & 101               \\
+Receiver run time              & 5800 ms          & 4000 ms          
+\end{tabular}
+\end{table}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[angle=0, width=0.95\linewidth]{CHAPTERS/PICS/phantom_guess.png}
+  \caption[Phantom 2D model, initial starting guess]
+{A velocity model in $ms^{-1}$. Initial velocities are chosen for the sea water velocity 1500 $ms^{-1}$). The subsurface is given a velocity gradient with the lowest velocity 1700 $ms^{-1}$ and the highest velocity at the bottom of the mode equal to 3000 $ms^{-1}$. The grid spacing of the model is defined by $dx$ which is set equal to 15m. }
+  \label{baseplot}
+
+  \vspace*{\floatsep}
+
+ \includegraphics[angle=0, width=0.95\linewidth]{CHAPTERS/PICS/phantom_true.png}
+ \caption[True phantom 2D model ]
+{A velocity model in $ms^{-1}$. Velocity anomalies are added to the base model.The velocity anomalies will be what the simulated model is trying to replicate. Circular smoothed anomalies of positive and negative values ( positive V = 2900 $ms^{-1}$, negative V = 1700 $ms^{-1}$) will bend rays. Reflectors with sharp edges are represented by the elliptical negative anomalies (V = 2000 $ms^{-1}$). Both are of different sizes and positions, again to see how well these can be replicated during inversion. The model has been based on the analogy of the North Sea, with sea depths of 300m and negative refractors imitating gas seepages. }
+ \label{testplot}
+\end{figure}  
+
+When testing geophysical processing within industry the Marmousi model is used as a control complex geological structure \citep{bourgeois1991marmousi}. Therefore the successful inversion of such model is synonymous with a working program.  Built from \verb|Synthetic Model| the true model is shown in figure \ref{marmousi_true} with the initial guess a smoothed version, shown in figure \ref{marmousi_guess}. 
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[angle=0, width=0.95\linewidth]{CHAPTERS/PICS/marmousi_true_2.png}
+  \caption[2D Marmousi Model]
+{A velocity model in $ms^{-1}$. 2D Marmousi Model based on a profile through North Quenguela trough in the Cuanza basin, Angola. The model contains many refractors, steep dips and strong velocity gradients both vertically and horizontally \citep{bourgeois1991marmousi}.}
+  \label{marmousi_true}
+  \vspace*{\floatsep}
+  \includegraphics[angle=0, width=0.95\linewidth]{CHAPTERS/PICS/marmousi_initialguess.png}
+  \caption[Smoothed 2D Marmousi model]
+{A velocity model in $ms^{-1}$. The 2D Marmousi model smoothed to provide a synthetic initial guess when running RTM and FWI.}
+ \label{marmousi_guess}
+\end{figure}
+
+\subsection{Paramaters}
+when creating a synthetic model to run inversion on certain criteria is required in order to produce a stable inversion. 
+
+\subsubsection{Frequency}
+A frequency value should be chosen to be able to image to a depth of 3km but also maintain reasonable resolution, without experiencing significant attenuation. It is always aimed that the lowest value of frequency is used in order to allow the iterations to converge to the minimum quicker. The better the starting model provided (when not using synthetic data, the quality of the collected data is key in deciding the frequency) the lower the frequency can be. It is usual to aim for a frequency between 3 - 15Hz \citep{guasch20123d}. 
+\subsubsection{Grid spacing}
+To avoid dispersion there must be a minimum of five grid points per wavelength for a fourth-order system (a system executing fourth order finite differences) \citep{warner2013anisotropic}, for the minimum wavelength. For both models the minimum velocity is 1500 $ms^{-1}$. Using $U_{min} = $F$ \lambda$ where $F$ is frequency and $\lambda$ is wavelength, gives $\lambda$ = 100m. Therefore the maximum grid spacing possible to avoid dispersion is 20m. 15m is chosen as a `safe' grid spacing, low enough below the maximum to ensure dispersion does not occur. The synthetic phantom 2D model is fourth order as the lower the spatial order, the more grid points per $\lambda$ required, requiring a finer grid spacing and in turn larger computational resources to run the inversion. 
+\subsubsection{Critical time-step}
+The critical time-step is given by a function in Devito that estimates $dt_{crit} < 0.495 \frac{\Delta x}{U_{c}}$, this condition is known as the Courant-Friedrichs-Lewy (CFL) Condition and must be met in order to retain stability when running inversion. If not, then the model can become unstable. It requires that a time step must be small enough that a wavefield crosses no more than half a node.  \citep{courant1967partial}. 
+\subsubsection{Receiver run time}
+This should be long enough that the wave propagated from the first source has enough time to travel to the bottom of the model and be received by the final source in the array. For the synthetic model assuming an average velocity of 2000 $ms^{-1}$ the minimum time interval is 5.8 s. 
+\begin{figure}[!ht]
+\begin{center}
+ \includegraphics[angle=0, width=0.90\linewidth]{CHAPTERS/PICS/wavetravel.pdf}
+\caption[Schematic of waves travel path]{The travel path taken by a wave propagated form the first source and received by the final receiver.}
+\label{parallel}
+\end{center}
+\end{figure}
+
+
+\section{Data}
+\begin{figure}[!ht]
+\begin{center}
+ \includegraphics[angle=0, width=0.70\linewidth]{CHAPTERS/PICS/ricker.png}
+\caption[Ricker wavelet used as the source wave]{Ricker wavelet defined by $A = (1-2 \pi^{2}f^{2}t^2)e^{-\pi^{2}f^{2}t^{2}}$ where $A$ is amplitude, $F$ frequency, and $t$ time in seconds. With $F = 15Hz$. }
+\label{ricker}
+\end{center}
+\end{figure}
+
+A Ricker wavelet (figure \ref{ricker}) is used as the source wavelet \citep{wang2015frequencies}.  An example of the shot record produced from this wavefield is shown in figure \ref{shot}. 
+
+\begin{figure}[!ht]
+\begin{center}
+ \includegraphics[angle=0, width=0.80\linewidth]{CHAPTERS/PICS/shot_record.png}
+\caption[Shot Record]{An example of the Shot record showing a pressure seismogram at the middle of the domain for the phantom 2D synthetic model.}
+\label{shot}
+\end{center}
+\end{figure}
+
+\section{FWI step length}
+Explained in Section \ref{step_length_section} is the importance of the starting value of the step length, $\alpha_{i}$. If the value is too large it can overshoot the correct minimum and settle in the wrong local minimum. A linear relationship must also be able to be assumed between the starting value of the gradient and the minimum value of $f$ along the direction of gradient. The value must be great enough that numerical rounding cannot interfere with it. To settle this criteria $\alpha_{i}$ has been taken as $1\%$ of the gradient normalised by the maximum value of the gradient. 
+
+\section{FWI models}
+When running FWI the number of sources and receivers used could be selected (nsrc). This project uses a random sample of 5 for each iteration for both models, for a minimum of 30 iterations. Enabling the whole span of the model to be covered without the need to utilise all sources at once. 

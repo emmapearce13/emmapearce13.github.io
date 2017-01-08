@@ -1,0 +1,110 @@
+\chapter{Discussion}
+Although all methodologies of FWI have the universal aim of reducing the objective function to a minimum, the gradient can be obtained using different algorithms. In addition to this, different heuristics can be put in place to improve the resolution of the reconstruction. The chosen techniques for the new methodology are discussed and evaluated along with results produced from the FWI notebook from both the phantom and Marmousi models.  
+
+\section{Gradient calculation used by the new methodology}
+
+
+
+When considering the method that should be used in the FWI notebook to obtain the `optimum' value of the step length, a calculation that can find the solution to a large-scale non-linear optimization problem is required \citep{metivier2016seiscope}. Global or local descent algorithms are the two types of method available to solve this exact problem with the differences shown in table \ref{globalvslocal}. 
+This highlights that the use of a global method for the synthetic models is implausible as dx = 15m giving the model 133,200 parameters ($\left (\frac{lx}{dx} \times \frac{lz}{dx} \right ) = (666 \times 200) = 133,200 $). Local descent methods offer far less iterations than the number of parameters to provide an acceptable sampling size, meaning the computation is cheaper and inversion can be achieved. 
+
+\begin{table}[!ht]
+\centering
+\caption[Comparison between global and local methods]{Comparison between global and local methods used to find the solution to a large-scale non-linear optimization problem \citep{metivier2016seiscope}.}
+\label{globalvslocal}
+\begin{tabular}{|l|l|l|l|}
+\hline
+Method & Description & Advantage & Disadvantage \\ \hline
+Global & Find the global minimum & Guaranteed to & Number of discrete parameters \\
+& of $f$ from any & find the global &cannot exceed a few tenths to \\
+& given starting point & minimum of the & hundreds as even modern high \\
+& through global & objective function. & performance computing (HPC). \\
+& convergence. Achieved & & platforms cannot evaluate $f$ \\
+& through a guided- & & in a reasonable time. In FWI the \\ 
+& random sampling of the & & number of unknown parameters is \\
+&parameter space. & & at a minimum an order of \\ 
+& & &magnitude greater rendering global \\ 
+& & & descent unfeasible. \\ \hline
+Local & From a chosen starting & Requires less & The global minimum is not \\
+& point the closest minimum &computational resources & always found. If the initial starting \\
+& of $f$ is converged towards. & as it is only & guess is not close enough to the, \\
+& Following an initial guess a &running a &true model it is possible to \\
+& series of iterations are run & monotonic decrease of the & converge into local \\
+& successively updating the &objective function &minimum. \\
+& model until the minimum & & \\ 
+& is found. & & \\ \hline
+\end{tabular}
+\end{table}
+
+Amongst possible local descent algorithms either first or second-order calculations can be used. The simplest are first order. These use only the gradient to define the descent direction. The two most common first order methods are the steepest descent and the non-linear conjugate gradient. Second-order methods are defined through the use of a second-order derivative used to approximate the inverse of the Hessian matrix, consisting of the quasi-Newton \textit{l}-BFGS method and the truncated Newton method. Presented below is a summary of each method utilising the work of \citet{metivier2016seiscope}. As all gradient methods ensured the decrease of the objective function and convergence towards a local minimum, it is just a matter of which method will provide the optimum reconstruction verses computational requirements.
+
+\subsubsection{Steepest descent}
+The steepest Descent (SD) is the simplest method, where if $P$ the preconditioned (Appendix \ref{notation_definitions}) is not defined then $\Delta x_{i}$ is just the opposite of the gradient of the objective function with respect to the model $\frac{\partial f}{\partial\textbf{m}}$ as shown by, 
+\begin{equation}
+\Delta x_{i} = -P \frac{\partial f}{\partial\textbf{m}}. 
+\label{steepest_descent}
+\end{equation}
+Advantages of this method are $P$ is not required, and it is computationally inexpensive. However, a high number of iterations can be needed to reach the minimum value of $f$. When using this method with the Marmousi model and $P$ obtained using \citet{shin2001improved} it provides good results, converging relatively quickly but recovering up to a maximum depth of approximately 4.5km.
+
+\subsubsection{Nonlinear conjugate gradient}
+The non-linear conjugate gradient (NCG) method is a linear convergence minimization algorithm for quadratic functions where the update to the model is computed as the opposite of the gradient (as in SD) but in addition to this, the descent direction is computed by the previous iteration, 
+\begin{equation}
+\Delta x_{0} = -Pf \\ 
+\Delta x_{i} = -P \frac{\partial f}{\partial\textbf{m}} + \beta_{i} \Delta x_{i-1}.
+\label{NCG}
+\end{equation}
+Where $\beta$ is a scale parameter calculated by \citet{dai1999nonlinear}. Although able to reduce the number of iterations required compared to SD, the method is unpredictable and can often cause erratic behaviour and for cases such as Marmousi it is less efficient than the SD. 
+
+\subsubsection{Quasi-Newton \textit{l}-BFGS }
+A second order method that is utilised due to its simplicity and efficiency \citep{nocedal1980updating} is the Quasi-Newton shown by, 
+\begin{equation}
+\Delta_{i} = -Q_{i} \frac{\partial f}{\partial\textbf{m}}.
+\end{equation}
+Where $Q_{i}$ is the approximation of the inverse Hessian calculated using finite difference. The similarity between this and the SD method is notable as $Q$ now substitutes as the preconditioner $P$. When calculating FWI this method can achieve a super-linear convergence rate meaning it is faster than SD and NCG. It can combine a diagonal $P$ and $Q$ to provide the best computational efficiency amongst the different optimisation methods, supported by its use on the 2D Marmousi model. It is also able to reconstruct higher resolution images to a depth greater than the first order methods.
+
+\subsubsection{Truncated Newton}
+This second order method does not calculate an approximation of the Hessian ($Q$) such as in Quasi-Newton, instead it computes an inexact (truncated) solution for the linear system associated with the Newton equation, allowing FWI to converge faster than Quasi-Newton but at a higher computational cost using, 
+\begin{equation}
+\textbf{H} \Delta x_{i} = - \frac{\partial f}{\partial\textbf{m} }.
+\end{equation}
+Both second order methods remain competitive on all other benchmarks \citep{castellanos2015fast}. 
+
+It was concluded that the SD method would be used, as it was the simplest to examine the convergence behaviour in detail, whilst providing a reliable reconstruction. It is possible that when testing on Marmousi that the second order methods were seen to out perform first order due to the initial model being sufficiently close to the true model. When running inversion on the phantom model this was not the case and therefore the difference between first and second order algorithms is less notable and does not justify the additional computational cost. As both first and second order would reconstruct to a good level of detail up to a depth of 4.5km, with the phantom and Marmousi models being 3km deep, the need for second order was not necessary. \par
+
+
+\section{Inversion results}
+From the inversions shown in Section \ref{results} a number of observations can be made. The optimum value of frequency used during the inversion to produce the best reconstruction is dependent on a number of parameters, and establishing the best to use is one of the most time consuming parts of initiating an inversion. 
+A lower frequency can be used if the data is a good quality, enabling the data to be recovered to a deeper depth as the wave-field experiences less attenuation and a lower amount of computational memory is required to run the inversion. For the same starting model, the lower the frequency, the fewer iterations needed to converge to the minimum functional value, and the faster the convergence, highlighted by the graphs \ref{mar_f3} where 3Hz is chosen as the source frequenc, and \ref{mar_f5} using 5Hz. The faster convergence is however achieved at a cost to the resolution of the final produced image. It is expected that a higher frequency will produce a better resolution reconstruction. Figure \ref{mar_f3} has a final functional value of 0.12 compared to 0.10 for figure \ref{mar_f5} along with a lower final residual value (45.95 versus 46.13), representative of an inversion that is closer to the true model. 
+Highlighted by figure \ref{f15_30it} is what can occur if a frequency of too high a value is used. The waves are unable to penetrate through the velocity contrasts associated with the circular anomalies in the phantom model. They are therefore only able to reconstruct the high impedance contrasts (i.e. that at the top of the positive anomaly, and the bottom of the negative anomaly), producing a poor inversion that has not been recovered below these features, as the wave-field is unable to penetrate through this layer. A high value frequency can also cause the inversion to become unstable and artefacts can be integrated into the reconstruction due to the CFL conditions not being met. \par
+
+From the data in Appendix \ref{results_ap} the values of the functional are high for all inversions run on the phantom model, in the order of {$10^{4}$}. The phantom model was also poorly reconstructed as shown by figure \ref{mask}, with the final residual value equal to 72.74, indicative of a model far from the observed data. Values as high as this are associated with cycle skipping, suggesting the starting model is not close enough to the true model to converge towards the correct minima. FWI uses a perturbed model that immediately reduces the mismatch between observed and predicted seismic data. Assuming the starting guess model is good enough, and the frequencies used are low enough then the following iterations will move the model in the right direction, towards the correct minima. However if the initial guess is more than $180^{\circ}$ out of phase with the true data then the first arrival of the model data can be matched to the wrong arrival of the true data, causing either the model to converge towards the incorrect local minima, or the value of $f$ will not reduce, getting bigger as the perpetuated guess moves further away from the true model \citep{shah2012quality}. To mitigate this issue the true model can be blurred to reduce any sharp boundary contrasts, producing an image that is easier to invert, and closer to the initial guess. This is however only a solution when using synthetic data. Currently cycle skipping is one of the main limitations of FWI preventing its wider adoption within industry use and although the process can be spotted manually by comparing predicted and observed data, this is an ambiguous subjective method. The work of \citet{shah2012quality} provides ``a robust and objective means " to mitigating this problem via the spatial continuity of windowed, low-frequency, phase differences. The implementation of such a method should be considered to ensure a more reliable inversion algorithm. \par
+
+Additional reasons for the poor reconstruction of the phantom model are that absorbing boundary conditions have not been modelled. These should be included to reproduce a semi-infinite model geometry and prevent false reflections from the model boundaries from contaminating the modelled wave-fields. These false reflections can be seen in figure \ref{shot}.  Further to this, a free-surface - a surface subject to zero parallel shear - should also be implemented within the model. Solid-fluid interface phenomena such as Rayleigh or ground roll waves etc. arise naturally when running inversions with FD operators and interfere with the source wave-field. Free-surface conditions can be implemented under the staggered formulation of \citet{moczo20023d}. 
+
+A more successful inversion is shown by the Marmousi model in figure \ref{mar_f3} and figure \ref{mar_f5}. The functional values are both significantly closer to zero than those from the phantom model, at 0.12 and 0.10 for 3Hz and 5Hz respectively. The reconstructions however are not perfect. One issue contributing to this is that the starting guess for Marmousi is a smoothed version of the true model. When smoothing the model in velocity, travel times are altered to produce the new image. If however the model is inverted to show slowness ($frac{1}{v}$) and smoothed, travel times are preserved leading to more accurate reconstructions. \par 
+
+
+As seismic surveys are often carried out offshore, the models that FWI are inverting for can have a water body associated with them. Shown in figure \ref{f3_30it}, is how the boundary between the subsurface and water has become distorted, caused due to inversion attempting to invert for the water properties rather than the surrounding rock. 
+As the properties of water can be taken as being constant they can be set \textit{a priori} to prevent the inversion being influenced by the values. This can be achieved by creating a mask that sets the gradient equal to zero for any velocity value below 1501 $ms^{-1}$ (the average velocity of salt water). Figure \ref{mask} highlights the difference that this heuristic makes in the inversion process, where a clear boundary between water and seabed can be seen. \par 
+
+As the energy of the sources propagates out it is dispersed over a larger area causing spherical spreading and attenuation. In terms of FWI this means the parts of the model further away from the source are imaged worse than those close to the sources, as they are being imaged with lower amplitude waves. Figure \ref{mar_f3} and figure \ref{mar_f5} highlight this phenomenon, where anomalously high velocity values can be seen at the points where the sources/receivers are located, as at these points the wave has not experienced any energy decay. In 2D the ratio between energy decay per unit area is proportional to the square of the distance between the source and the wave-field ($A \approx \frac{1}{r^{2}}$) \citep{guasch20123d}. Therefore, when inverting these points produce anomalously high values. To account for this a Hessian preconditioned can be used, a matrix that is able to boost frequencies that have lost energy through spherical spreading and damp those close to the source. This is an optional method that when combined with the SD gradient is very successful at producing a faster convergence rate and a better resolution image. \par
+To ensure the FWI algorithm is able to reconstruct a realistic value of the subsurface, constraints have been applied to prevent seismic velocity values being included that are unrepresentative of geological properties. In this case velocities below 1500 $ms^{-1}$, as this would be slower than the water velocity, and above 4500 $ms^{-1}$, highly a metamorphosed rock, are set $\textit{a priori}$.
+
+\subsubsection{Limitations of the notebook format}
+The notebook is intended to be a practical way to implement FWI such that a model can easily be placed into it, however this means the model must have certain criteria to work with the algorithm. Included in this criteria are that the model being the transpose of the true data, frequency should be stated in kHz and velocity in $mms^{-1}$, the model should also be written in Python 3, as ipyparallel is not compatible with Python 2.7. 
+Further to this, parameters are intended to be simple to change including frequency, grid spacing and receiver run time, but due to the use of Jupyter Notebook, when changes are made the cluster must be re started for them to be recognised. 
+When running the algorithm, if connection is lost to the notebook, it is not possible to reload the current inversion despite the cluster still being active. This presents a distinctive limitation, and has been a consistent issue throughout and limited the number of inversions that have been run, and making an already extensive debugging process even longer. 
+
+\subsection{Issues encountered and future work}
+Inversion is a computationally demanding algorithm, and can therefore quickly become bigger than the allocated RAM. The phantom 2D model with a grid spacing of 666 by 200 is unable to run below 125 GB of computational memory with greater than 5 sources being used per iteration (out of a total of 666). The amount of inversions that have been run was limited by this fact, as it was only possible to run one model at a time, with each taking around 3 hours to complete. 
+The extension of the FWI algorithm to a non-isotropic, attenuating, elastic, 3D model is a relatively simple step from the current method. The extension simply requires the starting seismic equation shown by equation \ref{accoustic_wave_equation} to be extended to include the above properties. The rest of the mathematics then remains the same, applying the same practices to the new equation. To include these properties a greater amount of RAM would be needed, but this is a feasible requirement. 
+
+A large proportion of the time taken for this project evolves around debugging the FWI algorithm to be able to produce a successful inversion. This is a time consuming process due to the multiple `layers' of the new methodology, with both high and low level languages being used, and although inversions were produced, improvements are still needed as noted by the above mentioned discussion. The most notable of which are, 
+\begin{enumerate}
+\item Hessian preconditioner 
+\item Preventer of cycle skipping 
+\item A second order gradient method
+\item Extension to include further model parameters 
+\end{enumerate}
+
+

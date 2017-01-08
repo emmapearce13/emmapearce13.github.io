@@ -1,0 +1,97 @@
+\documentclass[a4paper,11pt,twoside]{report}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=3cm]{geometry}
+\usepackage[sort]{natbib}
+\usepackage{lscape}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage{verbatim}
+\usepackage{STYLEFILES/mathchars}
+\usepackage{setspace}
+\usepackage{rotating}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{lscape}
+\usepackage{textcomp}
+\usepackage{adjustbox}
+\usepackage[utf8]{inputenc}
+\setlength{\parindent}{1em}
+\setlength{\parskip}{1em}
+\setlength{\parindent}{1cm}
+
+\input{STYLEFILES/uhead.sty}
+
+\input{STYLEFILES/443_templace.sty}
+
+\begin{document}
+	
+\begin{titlepage}
+\begin{center}
+
+\vspace*{1in}
+{\Huge A new Methodology for Implementing Full Waveform Inversion }
+
+\vspace*{1in}
+{\large Emma Pearce}
+
+
+\vspace*{.25in}
+{\large  Supervisor: Dr Gerard Gorman}
+
+\vspace{.25in}
+
+Submission Date: January 2017 \linebreak
+
+\vspace*{0.75in}
+
+\centerline{\includegraphics[width=4.0cm]{rsmlogo.png}}
+\vspace{0.5in}
+
+This report is submitted as part requirement for the MSci Degree in Geophysics at Imperial College London. It is substantially the result of my own work except where explicitly indicated in the text.
+
+The report may be freely copied and distributed provided the source is explicitly acknowledged.
+
+Imperial College London
+
+Department of Earth Science and Engineering
+
+\vspace{0.25in}
+
+The main body of this dissertation has XXXX words.
+
+\end{center}
+\end{titlepage}
+
+
+\preface
+\input{PREFACE/abstract}
+
+
+\body
+\listoffigures
+\listoftables
+
+\input{CHAPTERS/introduction}
+\input{CHAPTERS/methodology}
+\input{CHAPTERS/results}
+\input{CHAPTERS/discussion}
+\input{CHAPTERS/conclusion}
+
+
+
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{agufull08}
+
+\bibliography{refs}
+
+
+\clearpage
+\appendix
+\addcontentsline{toc}{chapter}{Appendices}
+\input{APPENDICES/notation_definitions}
+\input{APPENDICES/results_ap}
+\input{APPENDICES/Scripts}
+
+
+\end{document}
+
